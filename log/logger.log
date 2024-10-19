@@ -1,0 +1,2 @@
+INFO - (10/20/2024 12:44:29 AM): [PID: 37657] Starting the script (Line: 22 [main.py])
+INFO - (10/20/2024 12:44:32 AM): [PID: 37657] file_cache is only supported with oauth2client<4.0.0 (Line: 49 [__init__.py])
