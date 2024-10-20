@@ -4,7 +4,7 @@ from utility import time_utility
 from utility.add_event_to_google_calendar import add_event
 from utility.clean_up import clean_up
 from utility.login import login
-from utility.get_series_data_for_current_day import get_series_data_for_current_day, \
+from utility.get_series_data import get_series_data_for_current_day, \
     get_series_data_for_today_and_next_no_of_days
 from utility.get_image_from_url import get_image_from_url
 from utility.Notification import DesktopNotification
