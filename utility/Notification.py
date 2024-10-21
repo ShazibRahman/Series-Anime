@@ -1,9 +1,7 @@
 import logging
 import os
-import pathlib
 
 import plyer
-from markdown_it.rules_inline import image
 
 os.environ["DISPLAY"] = ":0"
 os.environ["DBUS_SESSION_BUS_ADDRESS"] = "unix:path=/run/user/1000/bus"
@@ -14,7 +12,7 @@ os.environ["DBUS_SESSION_BUS_ADDRESS"] = "unix:path=/run/user/1000/bus"
 
 class DesktopNotification:
 
-    def __init__(self, title: str, message: str, image_path: str="No"):
+    def __init__(self, title: str, message: str, image_path: str = "No"):
         """
         Initializes a Birthday notification with the given title and message.
 
@@ -42,5 +40,5 @@ class DesktopNotification:
 
 
 if __name__ == "__main__":
-    DesktopNotification("test", "test","danger.png")
+    DesktopNotification("test", "test", "danger.png")
     print("done")

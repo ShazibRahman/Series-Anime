@@ -1,14 +1,12 @@
-
 import logging as log
 import pathlib
 import sys
 from logging.handlers import TimedRotatingFileHandler
 
-
 logger_path = (
-  pathlib.Path(__file__)
-  .parent
-  .joinpath("logger.log")
+    pathlib.Path(__file__)
+    .parent
+    .joinpath("logger.log")
 )
 
 # Create the logger
@@ -38,7 +36,7 @@ handler.addFilter(ExcludeAESFilter())
 
 # Define the log format
 formatter = log.Formatter(
-        "%(levelname)s - (%(asctime)s): [PID: %(process)d] %(message)s (Line: %(lineno)d [%(filename)s])"
+    "%(levelname)s - (%(asctime)s): [PID: %(process)d] %(message)s (Line: %(lineno)d [%(filename)s])"
 )
 formatter.datefmt = "%m/%d/%Y %I:%M:%S %p"
 

@@ -1,21 +1,24 @@
-import requests
-from bs4 import BeautifulSoup
 from pathlib import Path
 
+import requests
+from bs4 import BeautifulSoup
+
 IMAGE_PATH = (Path(__file__)
-                .parent  # utility
-                .parent  # src
-                .joinpath("images"))
+              .parent  # utility
+              .parent  # src
+              .joinpath("images"))
 if not IMAGE_PATH.exists():
     IMAGE_PATH.mkdir()
 
-def get_image_from_url(session:requests.Session,url: str) -> Path | None:
+
+def get_image_from_url(session: requests.Session, url: str) -> Path | None:
     html = session.get(url).text
     soup = BeautifulSoup(html, 'html.parser')
-    img = soup.find('img',id="big_image")
+    img = soup.find('img', id="big_image")
     return _save_image_from_url(img['src'])
 
-def _save_image_from_url(url:str)-> Path | None:
+
+def _save_image_from_url(url: str) -> Path | None:
     if url is None or url == "":
         return None
     image_name = url.split("/")[-1]

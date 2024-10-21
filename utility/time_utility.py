@@ -1,5 +1,5 @@
-from datetime import datetime
 import calendar
+from datetime import datetime
 
 day_name_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
@@ -23,6 +23,7 @@ def get_current_day() -> str:
 
     return calendar.day_name[datetime.now().weekday()]
 
+
 def get_no_of_days_between_current_day_and_day(day_name: str) -> int:
     """
     This function returns the number of days between the current day and the day_name
@@ -34,12 +35,14 @@ def get_no_of_days_between_current_day_and_day(day_name: str) -> int:
     day_name_index = day_name_list.index(day_name)
     return day_name_index - current_day_index
 
+
 def get_current_month_day_as_int() -> int:
     """
     This function returns the current date
     :return: str
     """
     return datetime.now().day
+
 
 def get_last_day_of_month_as_int() -> int:
     """
@@ -49,6 +52,7 @@ def get_last_day_of_month_as_int() -> int:
     today = datetime.now()
     return calendar.monthrange(today.year, today.month)[1]
 
+
 def get_current_month_range() -> tuple:
     """
     This function returns the first and last day of the current month
@@ -56,6 +60,7 @@ def get_current_month_range() -> tuple:
     """
     today = datetime.now()
     return calendar.monthrange(today.year, today.month)
+
 
 def get_current_date() -> datetime.date:
     """
@@ -65,9 +70,9 @@ def get_current_date() -> datetime.date:
     return datetime.now().date()
 
 
-if __name__=="__main__":
-  print(  match_current_day("Sunday")) # returns True if today is Sunday, else False
-  #
-  # print(get_current_day()) # returns the current day
+if __name__ == "__main__":
+    print(match_current_day("Sunday"))  # returns True if today is Sunday, else False
+    #
+    # print(get_current_day()) # returns the current day
 
-  # print(get_no_of_days_between_current_day_and_day("Saturday")) # returns the number of days between the current day and Sunday
+    # print(get_no_of_days_between_current_day_and_day("Saturday")) # returns the number of days between the current day and Sunday

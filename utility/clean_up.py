@@ -1,7 +1,6 @@
-
 import logging
-from utility.get_image_from_url import IMAGE_PATH
 
+from utility.get_image_from_url import IMAGE_PATH
 
 
 def clean_up():
@@ -14,6 +13,7 @@ def clean_up():
     Returns:
         None
     """
+    logging.info("Cleaning up the images directory")
     if IMAGE_PATH.exists():
         for file_path in IMAGE_PATH.iterdir():
             try:
