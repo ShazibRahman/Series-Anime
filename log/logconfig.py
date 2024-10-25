@@ -11,8 +11,7 @@ logger_path = (
 
 # Create the logger
 logger = log.getLogger()
-logger.setLevel(log.INFO)
-
+logger.setLevel(log.ERROR)
 
 class ExcludeAESFilter(log.Filter):
     def filter(self, record):

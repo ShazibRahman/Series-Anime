@@ -1,3 +1,7 @@
+import datetime
+import time
+
+import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
@@ -10,8 +14,8 @@ def get_series_data_for_current_day(page_content: str) -> list:
 
         shows = parent.find_all('div', class_='cal_name')
         times = parent.find_all('div', class_='cal_more')
-        return [(show.find('a').text, _modify_link(show.find('a')['href']), time.find('div', class_='h').text) for
-                show, time in zip(shows, times)]
+        return [(show.find('a').text, _modify_link(show.find('a')['href']), TIME.find('div', class_='h').text) for
+                show, TIME in zip(shows, times)]
     else:
         return []
 
@@ -25,15 +29,13 @@ def get_series_data_for_today_and_next_no_of_days_within_a_week(page_content: st
     if today_anchor:
         parent = today_anchor.parent
         day_data = parent
-        print(day_data)
 
         shows = day_data.find_all('div', class_='cal_name')
         times = day_data.find_all('div', class_='cal_more')
         days_to_add_in_time = [0] * len(shows)
         series_data.extend(
-            [(show.find('a').text, _modify_link(show.find('a')['href']), time.find('div', class_='h').text, day) for
-             show, time, day in zip(shows, times, days_to_add_in_time)])
-        print(series_data)
+            [(show.find('a').text, _modify_link(show.find('a')['href']), TIME.find('div', class_='h').text, day) for
+             show, TIME, day in zip(shows, times, days_to_add_in_time)])
     for i in range(1, no_of_days + 1):
         day_data = day_data.next_sibling.next_sibling  # noqa
         shows = day_data.find_all('div', class_='cal_name')
@@ -61,10 +63,47 @@ def get_series_data_for_the_current_month_btw_start_date_end_date(page_content: 
                 times = day_data_td.find_all('div', class_='cal_more')
                 day_list = [int(day)] * len(shows)
                 series_data.extend([(show.find('a')['title'], _modify_link(show.find('a')['href']),
-                                     time.find('div', class_='h').text, day) for show, time, day in
+                                     TIME.find('div', class_='h').text, day) for show, TIME, day in
                                     zip(shows, times, day_list)])
 
     return series_data
+
+
+def get_series_data_for_the_current_month_btw_start_date_end_date_v2(page_content: str, start_date, end_date,
+                                                                     month: int, year: int) -> list:
+    print(month, year)
+    soup = BeautifulSoup(page_content, 'html.parser')
+    spans = soup.find_all('span')
+    series_data = []
+
+    today: datetime.date = datetime.date.today().replace(month=month, year=year)
+
+    for span in spans:
+        if span.string and span.string.strip().isdigit():  # Check if the span contains a number (the day)
+            day = span.string.strip()
+            if start_date <= int(day) <= end_date:
+                day_data_td = span.parent.parent
+                shows = day_data_td.find_all('div', class_='cal_name')
+                times = day_data_td.find_all('div', class_='cal_more')
+                day_to_add_to_list = today.replace(day=int(day))
+                day_list = [day_to_add_to_list] * len(shows)
+                series_data.extend([(show.find('a')['title'], _modify_link(show.find('a')['href']),
+                                     TIME.find('div', class_='h').text, day) for show, TIME, day in
+                                    zip(shows, times, day_list)])
+
+    return series_data
+
+
+def get_series_for_year(session: requests.session, year: int):
+    base_url = "https://next-episode.net/calendar/"
+    for month in range(1, 13):
+        start_time = time.time()
+        response = session.get(base_url, params={"year": year, "month": month})
+        print(f"time taken = {time.time() - start_time}")
+        if response.status_code == 200:
+            yield get_series_data_for_the_current_month_btw_start_date_end_date_v2(response.text, 1, 31, month, year)
+        else:
+            yield []
 
 
 def _modify_link(link: str) -> str:

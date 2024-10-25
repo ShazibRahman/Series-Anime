@@ -70,6 +70,13 @@ def get_current_date() -> datetime.date:
     return datetime.now().date()
 
 
+def get_current_year():
+    """
+    This function returns the current year
+    :return: int
+    """
+    return datetime.now().year
+
 if __name__ == "__main__":
     print(match_current_day("Sunday"))  # returns True if today is Sunday, else False
     #
