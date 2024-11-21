@@ -1,3 +1,7 @@
+"""
+This module contains functions for checking if events have already been added for the month.
+"""
+
 import datetime
 import io
 
@@ -5,17 +9,23 @@ import json
 import pathlib
 from json import JSONDecodeError
 
-DATA_FOLDER = pathlib.Path(__file__).parent.parent.joinpath('data')
+DATA_FOLDER = pathlib.Path(__file__).parent.parent.joinpath("data")
 
 if not DATA_FOLDER.exists():
     DATA_FOLDER.mkdir()
 
-EVENTS_FILE = DATA_FOLDER.joinpath('events.json')
+EVENTS_FILE = DATA_FOLDER.joinpath("events.json")
 
 
 def __read_json_file(file_path):
+    """
+    Reads the given file and returns its content as a JSON object.
+
+    If the file does not exist or its content is not valid JSON,
+    the function will return an empty list.
+    """
     try:
-        with io.open(file_path, 'r', encoding='utf-8') as file:
+        with io.open(file_path, "r", encoding="utf-8") as file:
             return json.load(file)
     except (FileNotFoundError, JSONDecodeError) as e:
         print(repr(e))
@@ -23,7 +33,7 @@ def __read_json_file(file_path):
 
 
 def __write_json_file(file_path, data):
-    with io.open(file_path, 'w', encoding='utf-8') as file:
+    with io.open(file_path, "w", encoding="utf-8") as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
 
 
@@ -47,4 +57,8 @@ def check_if_events_already_added_for_the_month(month: datetime.date) -> bool:
 
 
 if __name__ == "__main__":
-    print(check_if_events_already_added_for_the_month(datetime.datetime.now().date().replace(day=16)))
+    print(
+        check_if_events_already_added_for_the_month(
+            datetime.datetime.now().date().replace(day=16)
+        )
+    )

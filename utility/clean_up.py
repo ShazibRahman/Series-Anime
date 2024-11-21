@@ -19,5 +19,5 @@ def clean_up():
             try:
                 if file_path.is_file():
                     file_path.unlink()
-            except Exception as e:
+            except Exception as e: # pylint: disable=broad-except
                 print(f"Error deleting file {file_path}: {e}")

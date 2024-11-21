@@ -1,7 +1,19 @@
+"""
+This module contains utility functions for time related tasks.
+"""
+
 import calendar
 from datetime import datetime
 
-day_name_list = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+day_name_list = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+]
 
 
 # suppose I pass sunday as the day_name to the function match_current_day(day_name: str) -> bool
@@ -77,9 +89,6 @@ def get_current_year():
     """
     return datetime.now().year
 
-if __name__ == "__main__":
-    print(match_current_day("Sunday"))  # returns True if today is Sunday, else False
-    #
-    # print(get_current_day()) # returns the current day
 
-    # print(get_no_of_days_between_current_day_and_day("Saturday")) # returns the number of days between the current day and Sunday
+if __name__ == "__main__":
+    print(match_current_day("Sunday"))

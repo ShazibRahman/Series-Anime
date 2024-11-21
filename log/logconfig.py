@@ -3,22 +3,26 @@ import pathlib
 import sys
 from logging.handlers import TimedRotatingFileHandler
 
-logger_path = (
-    pathlib.Path(__file__)
-    .parent
-    .joinpath("logger.log")
-)
+logger_path = pathlib.Path(__file__).parent.joinpath("logger.log")
 
 # Create the logger
 logger = log.getLogger()
-logger.setLevel(log.ERROR)
+logger.setLevel(log.INFO)
+
 
 class ExcludeAESFilter(log.Filter):
+    """
+    Filter out log records from file_data_utility.py.
+    """
+
     def filter(self, record):
-        # Check if the record comes from aes.py
-        # If yes, return False to exclude it; otherwise, return True
-        # print(record)
-        if record.filename == "aes.py":
+        """
+        Filter out log records from file_data_utility.py.
+
+        :param record: The log record to check
+        :return: False if the record comes from file_data_utility.py, True otherwise
+        """
+        if record.filename == "file_data_utility.py":
             return False
         return True
 
