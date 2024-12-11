@@ -1,3 +1,7 @@
+"""
+This module contains utility functions for adding events to Google Calendar.
+"""
+
 import datetime
 
 import pytz

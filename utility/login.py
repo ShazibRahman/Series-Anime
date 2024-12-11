@@ -18,5 +18,5 @@ def login_user(username: str, password: str, login_url: str) -> requests.Session
         requests.Session: An authenticated session if the login is successful.
     """
     session = requests.Session()
-    session.post(login_url, data={'username': username, 'password': password})
+    session.post(login_url, data={"username": username, "password": password})
     return session
