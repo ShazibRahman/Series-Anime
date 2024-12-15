@@ -97,10 +97,10 @@ def get_series_data_for_today_and_next_no_of_days_within_a_week(
                 (
                     show.find("a")["title"],
                     _modify_link(show.find("a")["href"]),
-                    time.find("div", class_="h").text,
+                    time_series.find("div", class_="h").text,
                     day,
                 )
-                for show, time, day in zip(shows, times, days_to_add_in_time)
+                for show, time_series, day in zip(shows, times, days_to_add_in_time)
             ]
         )
 
