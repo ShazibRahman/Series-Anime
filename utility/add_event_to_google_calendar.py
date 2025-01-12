@@ -7,6 +7,8 @@ import datetime
 import pytz
 from gdrive import my_google_calendar
 
+I_M_P = "%I:%M%p"
+
 TI = "Asia/Kolkata"
 
 
@@ -36,6 +38,7 @@ def _add_event_to_google_calendar(
     )
 
 
+
 # not being used for now don't use its
 def add_event_for_a_week(series_list: list):
     """
@@ -63,7 +66,7 @@ def add_event_for_a_week(series_list: list):
 
         # parse 7:30pm today to datetime object using pytz and datetime
 
-        datetime_series = datetime.datetime.strptime(time_str, "%I:%M%p")
+        datetime_series = datetime.datetime.strptime(time_str, I_M_P)
         combined_datetime = datetime.datetime.combine(
             day_after_n_days, datetime_series.time()
         )
@@ -99,7 +102,7 @@ def add_event_for_current_month(series_list: list):
         day_of_the_series = date_today.replace(day=day)
 
         # parse 7:30pm today to datetime object using pytz and datetime
-        date_time_series = datetime.datetime.strptime(time_str, "%I:%M%p")
+        date_time_series = datetime.datetime.strptime(time_str, I_M_P)
         combined_datetime = datetime.datetime.combine(
             day_of_the_series, date_time_series.time()
         )
@@ -132,7 +135,7 @@ def add_event_from_data_series(series_list: list):
         day: datetime.date = series[3]  # this is the datetime.date
 
         # parse 7:30pm today to datetime object using pytz and datetime
-        date_time_series = datetime.datetime.strptime(time_str, "%I:%M%p")
+        date_time_series = datetime.datetime.strptime(time_str, I_M_P)
         combined_datetime = datetime.datetime.combine(day, date_time_series.time())
         start_time = pytz.timezone(TI).localize(
             combined_datetime + datetime.timedelta(hours=1)

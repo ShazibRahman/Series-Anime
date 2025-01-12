@@ -3,6 +3,7 @@ import os
 import pathlib
 import time
 from functools import wraps
+import logging
 
 import psutil
 
@@ -44,7 +45,13 @@ class LockManager:
         """
         while os.path.exists(self.lock_file):
             with open(self.lock_file, "r", encoding="utf-8") as file:
-                pid = file.read()
+                pid = file.read().strip()
+
+                if pid == "":
+                    # Remove stale lock file
+                    os.remove(self.lock_file)
+                    continue
+
                 if pid == str(os.getpid()):
                     logging.info("Control already acquired.")
                     return True
@@ -105,7 +112,7 @@ if __name__ == "__main__":
     # lock_manager = LockManager(
     #     "/home/shazib/Desktop/Folder/python/wallpaper_updates/wallpaper_updator.lock"
     # )
-    import logging
+
 
     logging.basicConfig(level=logging.INFO)
 

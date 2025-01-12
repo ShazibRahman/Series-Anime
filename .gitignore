@@ -173,7 +173,12 @@ cython_debug/
 
 *.out
 .idea
+*.lock
 
 /log/*.log
 /log/*.log.*
 /data
+
+
+# python environment
+/myenv
