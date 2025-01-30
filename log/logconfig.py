@@ -33,6 +33,7 @@ handler = TimedRotatingFileHandler(
     when="midnight",  # Rotate daily
     interval=1,  # Interval in days
     backupCount=5,  # Keep logs for the last 5 days
+    errors="ignore",
 )
 
 handler.addFilter(ExcludeAESFilter())

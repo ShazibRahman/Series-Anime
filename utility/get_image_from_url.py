@@ -1,3 +1,14 @@
+"""
+This module provides functionality to download images from a given URL and save them to a local directory.
+
+Functions:
+    get_image_from_url(session: requests.Session, url: str) -> Path | None:
+        Downloads the image of the anime from the given URL and returns the path to the saved image.
+    
+    _save_image_from_url(url: str) -> Path | None:
+        Downloads an image from the given URL and saves it to the images folder.
+"""
+
 from pathlib import Path
 
 import requests

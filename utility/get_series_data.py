@@ -4,6 +4,7 @@ This module contains functions for retrieving series data from next episode.
 
 import datetime
 import time
+import warnings
 
 import requests
 from bs4 import BeautifulSoup
@@ -65,6 +66,10 @@ def get_series_data_for_today_and_next_no_of_days_within_a_week(
         list: A list of tuples. Each tuple contains the name of the show,
         the link to the show and the time of the show.
     """
+    warnings.warn(
+        "get_series_data_for_today_and_next_no_of_days_within_a_week is deprecated and will be removed in a future version.",
+        DeprecationWarning,
+    )
     soup = BeautifulSoup(page_content, "html.parser")
     today_anchor: Tag = soup.find("a", {"name": "today"})
     series_data = []
@@ -179,8 +184,18 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
     soup = BeautifulSoup(page_content, "html.parser")
     spans = soup.find_all("span")
     series_data = []
+    
 
-    today_date: datetime.date = datetime.date.today().replace(month=month, year=year)
+    # try:
+    #     today_date: datetime.date = datetime.date.today().replace(month=month, year=year)
+    # except ValueError as e:
+    #     print(f"Error: {e}")
+    #     today_date: datetime.date = datetime.date.today().replace(month=month, day=1, year=year)
+
+    # it is better to use the first day of the month rather than channging todays date to the month and year
+    first_day_of_month = datetime.date(year, month, 1)
+    
+    # print(f"{today_date=}")
 
     for span in spans:
         if (
@@ -190,9 +205,13 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
             if start_date <= int(day) <= end_date:
                 day_data_td = span.parent.parent
                 shows = day_data_td.find_all("div", class_="cal_name")
+                if not shows or len(shows) == 0:
+                    # if there are no shows for the day,
+                    continue
                 times = day_data_td.find_all("div", class_="cal_more")
-                day_to_add_to_list = today_date.replace(day=int(day))
+                day_to_add_to_list = first_day_of_month.replace(day=int(day))
                 day_list = [day_to_add_to_list] * len(shows)
+                # print(f"{day_list=} {shows=} {times=}")
                 series_data.extend(
                     [
                         (
