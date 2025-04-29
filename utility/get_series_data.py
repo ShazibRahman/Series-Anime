@@ -185,14 +185,9 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
     spans = soup.find_all("span")
     series_data = []
     
-
-    # try:
-    #     today_date: datetime.date = datetime.date.today().replace(month=month, year=year)
-    # except ValueError as e:
-    #     print(f"Error: {e}")
-    #     today_date: datetime.date = datetime.date.today().replace(month=month, day=1, year=year)
-
-    # it is better to use the first day of the month rather than channging todays date to the month and year
+    extracted_month,extracted_year = get_month_year_from_html(soup)
+    if month != extracted_month or year != extracted_year:
+        raise ValueError(f"The month and year in the response header ({extracted_month}, {extracted_year}) do not match the requested month and year ({month}, {year}).")
     first_day_of_month = datetime.date(year, month, 1)
     
     # print(f"{today_date=}")
@@ -220,11 +215,42 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
                             TIME.find("div", class_="h").text,
                             day,
                         )
-                        for show, TIME, day in zip(shows, times, day_list)
+                        for show, TIME, day in zip(shows, times, day_list)  if not apply_filter(show.find("a")["title"])
                     ]
                 )
 
     return series_data
+
+
+def apply_filter(show_name:str) -> bool:
+
+    filters = set()
+    
+    filters.add("The Last of Us - 2xSpecial".lower())
+
+    for filter_ in filters:
+        if filter_ in show_name.lower():
+            return True
+
+    
+
+
+def get_month_year_from_html(soup):
+    select_tag = soup.find('select', {'id': 'month'})
+    selected_option = select_tag.find('option', {'selected': True})
+    month_ = selected_option.text.strip()  # Get the text of the selected option
+
+    # Step 2: Extract the year
+    year_tag = select_tag.find_next('span')  # Find the adjacent span tag
+    year_ = year_tag.text.strip()  # Get the text of the span tag
+
+    # month [April] and year should be integer
+    month_ = month_.lower()
+    month_ = month_.capitalize()
+    month_ = datetime.datetime.strptime(month_, "%B").month
+    year_ = int(year_)
+    return month_, year_
+    
 
 
 def get_series_for_year(session: requests.session, year: int):

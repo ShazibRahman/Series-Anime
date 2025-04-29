@@ -1,21 +1,19 @@
 """
-A module for creating desktop notifications using the plyer library.
+A module for creating desktop notifications using the notify-send command.
 """
 
 import logging
 import os
+import subprocess
+from pathlib import Path
 
-import plyer
-
+# Ensure the DBUS session bus is set correctly (optional, depending on your environment)
 os.environ["DBUS_SESSION_BUS_ADDRESS"] = "unix:path=/run/user/1000/bus"
-
-
-# print(icon_image)
 
 
 class DesktopNotification:
     """
-    A class for creating desktop notifications using the plyer library.
+    A class for creating desktop notifications using the notify-send command.
 
     Attributes:
         title (str): The title of the notification.
@@ -25,7 +23,7 @@ class DesktopNotification:
 
     def __init__(self, title: str, message: str, image_path: str = "No"):
         """
-        Initializes a Birthday notification with the given title and message.
+        Initializes a desktop notification with the given title and message.
 
         Parameters:
             title (str): The title of the notification.
@@ -36,19 +34,24 @@ class DesktopNotification:
             None
         """
         try:
-            plyer.notification.notify(
-                title=title,
-                message=message,
-                app_name="Series",
-                timeout=10,
-                ticker="Series",
-                toast=True,
-                app_icon=image_path,
-            )
-        except Exception as e:  # pylint: disable=broad-except
-            logging.error(e)
+            if image_path != "No" and Path(image_path).exists():
+                icon = Path(image_path).as_posix()
+            else:
+                icon = None 
+
+            notify_send_args = ["notify-send", title, message, "-t", "10000"]
+
+            if icon:
+                notify_send_args.extend(["-i", icon])
+
+            subprocess.run(notify_send_args, check=True)
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to send notification: {e}")
+        except Exception as e:
+            logging.error(f"Unexpected error: {e}")
 
 
 if __name__ == "__main__":
-    DesktopNotification("test", "test", "danger.png")
+    # Example usage
+    DesktopNotification("Test Notification", "This is a test notification.", "danger.png")
     print("done")
