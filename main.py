@@ -29,15 +29,11 @@ def main():
     """Main function to execute the script for adding anime events to Google Calendar."""
     start_time = time.time()
 
-    if (
-        not check_if_events_already_added_for_the_month(time_utility.get_current_date())
-        or True
-    ):  # adding true so that it can run on every cron trigger
+    if not check_if_events_already_added_for_the_month(time_utility.get_current_date()):
         start_time = time.time()
         s = login_user(USERNAME, PASSWORD, LOGIN_URL)
         # clean_up()
         pickled_record = get_pickled_stored_record()
-
 
         print("Getting series for the year")
 
@@ -57,10 +53,12 @@ def main():
 
                 add_event_from_data_series(data)
 
-    save_pickled_record(pickled_record)
+        save_pickled_record(pickled_record)
 
     logging.info("Finished the script in %s secs", time.time() - start_time)
 
 
 if __name__ == "__main__":
+
+    piclded = {}
     main()

@@ -22,5 +22,7 @@ def login_user(username: str, password: str, login_url: str) -> requests.Session
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:110.0) Gecko/20100101 Firefox/110.0",
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    session.post(login_url, data={"username": username, "password": password}, headers=headers)
+    session.post(
+        login_url, data={"username": username, "password": password}, headers=headers
+    )
     return session

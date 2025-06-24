@@ -14,8 +14,6 @@ from .filters_util import series_filter
 
 from .hash_utility import order_independent_hash
 
-import logging
-
 
 def get_series_data_for_current_day(page_content: str) -> list:
     """

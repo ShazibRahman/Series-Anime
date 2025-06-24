@@ -89,6 +89,7 @@ def get_current_year():
     """
     return datetime.now().year
 
+
 def get_current_month():
     """
     This function returns the current month

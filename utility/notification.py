@@ -37,7 +37,7 @@ class DesktopNotification:
             if image_path != "No" and Path(image_path).exists():
                 icon = Path(image_path).as_posix()
             else:
-                icon = None 
+                icon = None
 
             notify_send_args = ["notify-send", title, message, "-t", "10000"]
 
@@ -53,5 +53,7 @@ class DesktopNotification:
 
 if __name__ == "__main__":
     # Example usage
-    DesktopNotification("Test Notification", "This is a test notification.", "danger.png")
+    DesktopNotification(
+        "Test Notification", "This is a test notification.", "danger.png"
+    )
     print("done")
