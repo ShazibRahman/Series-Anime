@@ -10,6 +10,12 @@ import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
+from .filters_util import series_filter
+
+from .hash_utility import order_independent_hash
+
+import logging
+
 
 def get_series_data_for_current_day(page_content: str) -> list:
     """
@@ -223,12 +229,7 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
 
 
 def apply_filter(show_name:str) -> bool:
-
-    filters = set()
-    
-    filters.add("The Last of Us - 2xSpecial".lower())
-
-    for filter_ in filters:
+    for filter_ in series_filter:
         if filter_ in show_name.lower():
             return True
 
@@ -253,7 +254,7 @@ def get_month_year_from_html(soup):
     
 
 
-def get_series_for_year(session: requests.session, year: int):
+def get_series_for_year(session: requests.session, year: int,hashed_dict: dict):
     """
     This generator function takes a requests session and a year and returns a generator that returns a list of tuples for each month in the given year.
     The list of tuples contains the name of the show, the link to the show and the time of the show.
@@ -276,9 +277,20 @@ def get_series_for_year(session: requests.session, year: int):
         response = session.get(base_url, params={"year": year, "month": month_loop})
         print(f"time taken = {time.time() - start_time}")
         if response.status_code == 200:
-            yield get_series_data_for_the_current_month_btw_start_date_end_date_v2(
+            series_list =  get_series_data_for_the_current_month_btw_start_date_end_date_v2(
                 response.text, 1, 31, month_loop, year
             )
+            key: str =  f"{month_loop}_{year}"
+
+            hashed_data  = order_independent_hash(series_list)
+
+            if key not in hashed_dict:
+                hashed_dict[key] = hashed_data
+                yield series_list
+            else:
+                print(f"data for {month_loop=} {year=} has not changed")
+                yield []
+
         else:
             yield []
 

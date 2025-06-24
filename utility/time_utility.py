@@ -89,6 +89,13 @@ def get_current_year():
     """
     return datetime.now().year
 
+def get_current_month():
+    """
+    This function returns the current month
+    :return: int
+    """
+    return datetime.now().month
+
 
 if __name__ == "__main__":
     print(match_current_day("Sunday"))
