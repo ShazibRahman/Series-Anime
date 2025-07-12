@@ -188,12 +188,14 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
     soup = BeautifulSoup(page_content, "html.parser")
     spans = soup.find_all("span")
     series_data = []
-    
-    extracted_month,extracted_year = get_month_year_from_html(soup)
+
+    extracted_month, extracted_year = get_month_year_from_html(soup)
     if month != extracted_month or year != extracted_year:
-        raise ValueError(f"The month and year in the response header ({extracted_month}, {extracted_year}) do not match the requested month and year ({month}, {year}).")
+        raise ValueError(
+            f"The month and year in the response header ({extracted_month}, {extracted_year}) do not match the requested month and year ({month}, {year})."
+        )
     first_day_of_month = datetime.date(year, month, 1)
-    
+
     # print(f"{today_date=}")
 
     for span in spans:
@@ -219,28 +221,27 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
                             TIME.find("div", class_="h").text,
                             day,
                         )
-                        for show, TIME, day in zip(shows, times, day_list)  if not apply_filter(show.find("a")["title"])
+                        for show, TIME, day in zip(shows, times, day_list)
+                        if not apply_filter(show.find("a")["title"])
                     ]
                 )
 
     return series_data
 
 
-def apply_filter(show_name:str) -> bool:
+def apply_filter(show_name: str) -> bool:
     for filter_ in series_filter:
         if filter_ in show_name.lower():
             return True
 
-    
-
 
 def get_month_year_from_html(soup):
-    select_tag = soup.find('select', {'id': 'month'})
-    selected_option = select_tag.find('option', {'selected': True})
+    select_tag = soup.find("select", {"id": "month"})
+    selected_option = select_tag.find("option", {"selected": True})
     month_ = selected_option.text.strip()  # Get the text of the selected option
 
     # Step 2: Extract the year
-    year_tag = select_tag.find_next('span')  # Find the adjacent span tag
+    year_tag = select_tag.find_next("span")  # Find the adjacent span tag
     year_ = year_tag.text.strip()  # Get the text of the span tag
 
     # month [April] and year should be integer
@@ -249,10 +250,9 @@ def get_month_year_from_html(soup):
     month_ = datetime.datetime.strptime(month_, "%B").month
     year_ = int(year_)
     return month_, year_
-    
 
 
-def get_series_for_year(session: requests.session, year: int,hashed_dict: dict):
+def get_series_for_year(session: requests.session, year: int, hashed_dict: dict):
     """
     This generator function takes a requests session and a year and returns a generator that returns a list of tuples for each month in the given year.
     The list of tuples contains the name of the show, the link to the show and the time of the show.
@@ -275,19 +275,25 @@ def get_series_for_year(session: requests.session, year: int,hashed_dict: dict):
         response = session.get(base_url, params={"year": year, "month": month_loop})
         print(f"time taken = {time.time() - start_time}")
         if response.status_code == 200:
-            series_list =  get_series_data_for_the_current_month_btw_start_date_end_date_v2(
-                response.text, 1, 31, month_loop, year
+            series_list = (
+                get_series_data_for_the_current_month_btw_start_date_end_date_v2(
+                    response.text, 1, 31, month_loop, year
+                )
             )
-            key: str =  f"{month_loop}_{year}"
+            key: str = f"{month_loop}_{year}"
 
-            hashed_data  = order_independent_hash(series_list)
+            hashed_data = order_independent_hash(series_list)
 
             if key not in hashed_dict:
                 hashed_dict[key] = hashed_data
                 yield series_list
             else:
-                print(f"data for {month_loop=} {year=} has not changed")
-                yield []
+                if hashed_dict[key] != hashed_data:
+                    hashed_dict[key] = hashed_data
+                    yield series_list
+                else:
+                    print(f"data for {month_loop=} {year=} has not changed")
+                    yield []
 
         else:
             yield []

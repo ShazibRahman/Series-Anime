@@ -29,7 +29,7 @@ def main():
     """Main function to execute the script for adding anime events to Google Calendar."""
     start_time = time.time()
 
-    if not check_if_events_already_added_for_the_month(time_utility.get_current_date()):
+    if not check_if_events_already_added_for_the_month(time_utility.get_current_date()) or True:
         start_time = time.time()
         s = login_user(USERNAME, PASSWORD, LOGIN_URL)
         # clean_up()
