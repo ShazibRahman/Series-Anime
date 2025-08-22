@@ -252,9 +252,12 @@ def get_month_year_from_html(soup):
     return month_, year_
 
 
-def get_series_for_year(session: requests.session, year: int, hashed_dict: dict):
+def get_series_for_year(
+    session: requests.session, year: int, hashed_dict: dict,  month_limiter: int = 12
+):
     """
-    This generator function takes a requests session and a year and returns a generator that returns a list of tuples for each month in the given year.
+    This generator function takes a requests session and a year and returns a generator that returns
+    a list of tuples for each month in the given year.
     The list of tuples contains the name of the show, the link to the show and the time of the show.
     The days are filtered so that only the days between the start date and the end date are included.
     If the page content doesn't contain the anchor tag with the name "today", it will return an empty list
@@ -269,11 +272,13 @@ def get_series_for_year(session: requests.session, year: int, hashed_dict: dict)
     base_url = "https://next-episode.net/calendar/"
 
     start_month, end_month = get_appropriate_month_range(year)
+    end_month = min(end_month, month_limiter)
+
 
     for month_loop in range(start_month, end_month + 1):
         start_time = time.time()
         response = session.get(base_url, params={"year": year, "month": month_loop})
-        print(f"time taken = {time.time() - start_time}")
+        print(f"time taken = {(time.time() - start_time):.2f} seconds")
         if response.status_code == 200:
             series_list = (
                 get_series_data_for_the_current_month_btw_start_date_end_date_v2(
