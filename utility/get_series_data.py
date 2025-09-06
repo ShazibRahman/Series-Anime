@@ -10,8 +10,7 @@ import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from .filters_util import series_filter
-
+from .filters_util import filter_series
 from .hash_utility import order_independent_hash
 
 
@@ -230,9 +229,8 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
 
 
 def apply_filter(show_name: str) -> bool:
-    for filter_ in series_filter:
-        if filter_ in show_name.lower():
-            return True
+    return filter_series(show_name)
+
 
 
 def get_month_year_from_html(soup):
@@ -253,17 +251,19 @@ def get_month_year_from_html(soup):
 
 
 def get_series_for_year(
-    session: requests.session, year: int, hashed_dict: dict,  month_limiter: int = 12
+        session: requests.Session, year: int, hashed_dict: dict, month_limiter: int = 12
 ):
     """
-    This generator function takes a requests session and a year and returns a generator that returns
+    This generator function takes a request session and a year and returns a generator that returns
     a list of tuples for each month in the given year.
     The list of tuples contains the name of the show, the link to the show and the time of the show.
     The days are filtered so that only the days between the start date and the end date are included.
     If the page content doesn't contain the anchor tag with the name "today", it will return an empty list
 
     Args:
-        session (requests.session): The requests session.
+        month_limiter:
+        hashed_dict:
+        session (requests.session): The requests' session.
         year (int): The year.
 
     Yields:
