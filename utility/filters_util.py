@@ -1,3 +1,4 @@
+import logging
 import re
 
 series_filter = {'plain_filter': set(), 'regex_filter': set()}
@@ -12,12 +13,15 @@ def filter_series(series_name: str) -> bool:
     # Check plain filters
     for series in series_filter['plain_filter']:
         if series in series_name.lower():
+            logging.info(f"Filtered out {series_name}")
             return True
 
     # Check regex filters
     for pattern in series_filter['regex_filter']:
         match = re.search(pattern, series_name.lower())
+
         if match:
+            logging.info(f"Filtered out {series_name}")
             return True
 
     return False
