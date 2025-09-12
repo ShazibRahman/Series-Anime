@@ -5,6 +5,8 @@ from logging.handlers import TimedRotatingFileHandler
 
 logger_path = pathlib.Path(__file__).parent.joinpath("logger.log")
 
+from utility import DesktopNotification
+
 # Create the logger
 logger = log.getLogger()
 logger.setLevel(log.INFO)
@@ -77,6 +79,7 @@ def log_uncaught_exceptions(exctype, value, traceback):
         return
 
     logger.exception("Uncaught exception", exc_info=(exctype, value, traceback))
+    DesktopNotification("Error occurred in MutualFundTracker", f"{exctype} : {value}")
 
 
 # Set the exception hook
