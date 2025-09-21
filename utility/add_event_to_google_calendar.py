@@ -5,7 +5,7 @@ This module contains utility functions for adding events to Google Calendar.
 import datetime
 
 import pytz
-from gdrive import my_google_calendar  # type: ignore
+from gdrive_tool import my_google_calendar
 
 I_M_P = "%I:%M%p"
 
