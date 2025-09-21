@@ -34,7 +34,7 @@ handler = TimedRotatingFileHandler(
     filename=logger_path,
     when="midnight",  # Rotate daily
     interval=1,  # Interval in days
-    backupCount=30,  # Keep 30 days' worth of logs
+    backupCount=5,
     errors="ignore",
 )
 
