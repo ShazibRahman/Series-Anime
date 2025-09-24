@@ -7,9 +7,7 @@ import os
 import time
 from datetime import datetime
 
-from common_util import config
-
-cfg = config.get_config("application.toml")
+import dotenv
 
 # Move all import statements here
 from utility import time_utility
@@ -19,11 +17,12 @@ from utility.lock_manager import lock_manager_decorator
 from utility.login import login_user
 from utility.pickle_utility import get_pickled_stored_record, save_pickled_record
 
-calendar_config = cfg["calendar"]
+dotenv.load_dotenv()
 
-LOGIN_URL = calendar_config["next_login_url"]
-USERNAME = calendar_config["next_user"]
-PASSWORD = calendar_config["next_password"]
+
+LOGIN_URL = os.getenv("next_login_url")
+USERNAME = os.getenv("next_user")
+PASSWORD = os.getenv("next_password")
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
 print(CUR_DIR)
 
