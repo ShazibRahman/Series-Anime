@@ -14,6 +14,7 @@ from .filters_util import filter_series
 from .hash_utility import order_independent_hash
 
 
+# not used don't use it for now
 def get_series_data_for_current_day(page_content: str) -> list:
     """
     This function takes the page content of the calendar page
@@ -115,6 +116,7 @@ def get_series_data_for_today_and_next_no_of_days_within_a_week(
     return series_data
 
 
+# not used don't use it for now
 def get_series_data_for_the_current_month_btw_start_date_end_date(
     page_content: str, start_date, end_date
 ) -> list:
@@ -232,7 +234,6 @@ def apply_filter(show_name: str) -> bool:
     return filter_series(show_name)
 
 
-
 def get_month_year_from_html(soup):
     select_tag = soup.find("select", {"id": "month"})
     selected_option = select_tag.find("option", {"selected": True})
@@ -251,7 +252,7 @@ def get_month_year_from_html(soup):
 
 
 def get_series_for_year(
-        session: requests.Session, year: int, hashed_dict: dict, month_limiter: int = 12
+    session: requests.Session, year: int, hashed_dict: dict, month_limiter: int = 12
 ):
     """
     This generator function takes a request session and a year and returns a generator that returns
@@ -273,7 +274,6 @@ def get_series_for_year(
 
     start_month, end_month = get_appropriate_month_range(year)
     end_month = min(end_month, month_limiter)
-
 
     for month_loop in range(start_month, end_month + 1):
         start_time = time.time()

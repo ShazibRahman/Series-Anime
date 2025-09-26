@@ -16,6 +16,7 @@ from utility.get_series_data import get_series_for_year
 from utility.lock_manager import lock_manager_decorator
 from utility.login import login_user
 from utility.pickle_utility import get_pickled_stored_record, save_pickled_record
+from log.logconfig import logger  # noqa: F401
 
 dotenv.load_dotenv()
 
