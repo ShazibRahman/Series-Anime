@@ -143,3 +143,28 @@ def add_event_from_data_series(series_list: list):
         # print(summary,start_time,end_time,description)
 
         _add_event_to_google_calendar(summary, start_time, end_time, description)
+
+
+def delete_no_longer_existing_events(series_list_to_delete: list):
+    """
+    This function deletes events from Google Calendar that are no longer existing.
+    The events to be deleted are stored in the NO_LONGER_EXISTING_EVENTS list.
+    """
+    google_calendar = my_google_calendar.GoogleCalendar()
+    for event in series_list_to_delete:
+        summary = event[0]
+
+        time_str = event[2]
+        day: datetime.date = event[3]  # this is the datetime.date
+
+        # parse 7:30pm today to datetime object using pytz and datetime
+        date_time_series = datetime.datetime.strptime(time_str, I_M_P)
+        combined_datetime = datetime.datetime.combine(day, date_time_series.time())
+        start_time = pytz.timezone(TI).localize(
+            combined_datetime + datetime.timedelta(hours=1)
+        )
+
+        google_calendar.delete_event(
+            start_date_to_update=start_time,
+            summary=summary,
+        )

@@ -12,6 +12,9 @@ from bs4.element import Tag
 
 from .filters_util import filter_series
 from .hash_utility import order_independent_hash
+from .return_event_that_no_longer_exist import return_no_longer_existing_event
+
+NO_LONGER_EXISTING_EVENTS = []
 
 
 # not used don't use it for now
@@ -252,7 +255,11 @@ def get_month_year_from_html(soup):
 
 
 def get_series_for_year(
-    session: requests.Session, year: int, hashed_dict: dict, month_limiter: int = 12
+    session: requests.Session,
+    year: int,
+    hashed_dict: dict,
+    series_old_data: dict,
+    month_limiter: int = 12,
 ):
     """
     This generator function takes a request session and a year and returns a generator that returns
@@ -288,6 +295,18 @@ def get_series_for_year(
             key: str = f"{month_loop}_{year}"
 
             hashed_data = order_independent_hash(series_list)
+            sorted_series_list = sorted(series_list, key=lambda x: x[3])
+            if key not in series_old_data:
+                series_old_data[key] = sorted_series_list
+
+            else:
+                no_longer_existing = return_no_longer_existing_event(
+                    series_old_data[key], sorted_series_list
+                )
+                if len(no_longer_existing) > 0:
+                    NO_LONGER_EXISTING_EVENTS.extend(no_longer_existing)
+
+                series_old_data[key] = sorted_series_list
 
             if key not in hashed_dict:
                 hashed_dict[key] = hashed_data
