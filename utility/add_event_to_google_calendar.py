@@ -17,6 +17,7 @@ def _add_event_to_google_calendar(
     start_time: datetime.datetime,
     end_time: datetime.datetime,
     series_description: str,
+    image_url: str = "",
 ):
     """
     This function adds an event to Google Calendar.
@@ -32,6 +33,7 @@ def _add_event_to_google_calendar(
     google_calendar.create_event(
         summary=series_name,
         description=series_description,
+        image_url=image_url,
         start_time=start_time,
         end_time=end_time,
         time_zone=TI,
@@ -113,7 +115,7 @@ def add_event_for_current_month(series_list: list):
         _add_event_to_google_calendar(summary, start_time, end_time, description)
 
 
-def add_event_from_data_series(series_list: list):
+def add_event_from_data_series(series_list: list, image_mapping: dict):
     """
     This function adds an event to Google Calendar for each series in the series_list.
     The event is created with the given series_name, start_time, end_time and series_description.
@@ -122,6 +124,7 @@ def add_event_from_data_series(series_list: list):
     The event is added to the calendar for the day in the series_list.
 
     Args:
+        image_mapping:
         series_list (list): A list of tuples.
         Each tuple contains the name of the series,
         the link to the series and the time of the show
@@ -141,11 +144,16 @@ def add_event_from_data_series(series_list: list):
         )
         end_time = start_time + datetime.timedelta(hours=1)
         # print(summary,start_time,end_time,description)
+        image_url = ""
+        if series[1] in image_mapping:
+            image_url = image_mapping[series[1]]
 
-        _add_event_to_google_calendar(summary, start_time, end_time, description)
+        _add_event_to_google_calendar(
+            summary, start_time, end_time, description, image_url
+        )
 
 
-def delete_no_longer_existing_events(series_list_to_delete: list):
+def delete_no_longer_existing_events(series_list_to_delete: list, image_mapping: dict):
     """
     This function deletes events from Google Calendar that are no longer existing.
     The events to be deleted are stored in the NO_LONGER_EXISTING_EVENTS list.
@@ -156,6 +164,10 @@ def delete_no_longer_existing_events(series_list_to_delete: list):
 
         time_str = event[2]
         day: datetime.date = event[3]  # this is the datetime.date
+        image_url = ""
+
+        if event[1] in image_mapping:
+            image_url = image_mapping[event[1]]
 
         # parse 7:30pm today to datetime object using pytz and datetime
         date_time_series = datetime.datetime.strptime(time_str, I_M_P)
@@ -167,4 +179,5 @@ def delete_no_longer_existing_events(series_list_to_delete: list):
         google_calendar.delete_event(
             start_date_to_update=start_time,
             summary=summary,
+            image_url=image_url,
         )

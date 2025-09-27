@@ -19,11 +19,11 @@ from utility.get_series_data import get_series_for_year, NO_LONGER_EXISTING_EVEN
 from utility.lock_manager import lock_manager_decorator
 from utility.login import login_user
 from utility.pickle_utility import (
-    get_pickled_stored_record,
-    save_pickled_record,
     get_picked_series_data,
     save_picked_series_data,
 )
+from utility.get_image_from_url import download_image_from_urls
+from utility.general_util import get_anime_url_from_events
 from log.logconfig import logger  # noqa: F401
 
 dotenv.load_dotenv()
@@ -43,8 +43,6 @@ def main():
     start_time = time.time()
     s = login_user(USERNAME, PASSWORD, LOGIN_URL)
     # clean_up()
-    pickled_record = get_pickled_stored_record()
-
     series_old_data = get_picked_series_data()
 
     print("Getting series for the year")
@@ -52,21 +50,28 @@ def main():
     current_year = time_utility.get_current_year()
     current_month = datetime.now().month
 
-    # Get series for the current year
-    for data in get_series_for_year(s, current_year, pickled_record, series_old_data):
+    images_mapping = {}
 
-        add_event_from_data_series(data)
+    # Get series for the current year
+    for data in get_series_for_year(s, current_year, series_old_data):
+        anime_url = get_anime_url_from_events(data)
+
+        images_mapping = download_image_from_urls(anime_url)
+
+        add_event_from_data_series(data, images_mapping)
 
     month_limiter = -7 + current_month
     next_year = current_year + 1
     print("Getting series for the next year")
     for data in get_series_for_year(
-        s, next_year, pickled_record, series_old_data, month_limiter
+        s, next_year, series_old_data, month_limiter
     ):  # till the month limiter
 
-        add_event_from_data_series(data)
+        anime_url = get_anime_url_from_events(data)
 
-    save_pickled_record(pickled_record)
+        images_mapping = download_image_from_urls(anime_url)
+
+        add_event_from_data_series(data, images_mapping)
 
     save_picked_series_data(series_old_data)
 
@@ -75,7 +80,7 @@ def main():
             "No longer existing events size: %d", len(NO_LONGER_EXISTING_EVENTS)
         )
         print(NO_LONGER_EXISTING_EVENTS)
-        delete_no_longer_existing_events(NO_LONGER_EXISTING_EVENTS)
+        delete_no_longer_existing_events(NO_LONGER_EXISTING_EVENTS, images_mapping)
     else:
         logging.info("No events to delete.")
 

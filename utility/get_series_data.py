@@ -11,8 +11,10 @@ from bs4 import BeautifulSoup
 from bs4.element import Tag
 
 from .filters_util import filter_series
-from .hash_utility import order_independent_hash
-from .return_event_that_no_longer_exist import return_no_longer_existing_event
+from .return_event_that_no_longer_exist import (
+    return_no_longer_existing_event,
+    return_new_list_of_series_which_actually_is_update,
+)
 
 NO_LONGER_EXISTING_EVENTS = []
 
@@ -257,7 +259,6 @@ def get_month_year_from_html(soup):
 def get_series_for_year(
     session: requests.Session,
     year: int,
-    hashed_dict: dict,
     series_old_data: dict,
     month_limiter: int = 12,
 ):
@@ -270,7 +271,6 @@ def get_series_for_year(
 
     Args:
         month_limiter:
-        hashed_dict:
         session (requests.session): The requests' session.
         year (int): The year.
 
@@ -294,30 +294,37 @@ def get_series_for_year(
             )
             key: str = f"{month_loop}_{year}"
 
-            hashed_data = order_independent_hash(series_list)
             sorted_series_list = sorted(series_list, key=lambda x: x[3])
             if key not in series_old_data:
                 series_old_data[key] = sorted_series_list
+                actual_new_filtered_list = sorted_series_list
 
             else:
                 no_longer_existing = return_no_longer_existing_event(
                     series_old_data[key], sorted_series_list
+                )
+                actual_new_filtered_list = (
+                    return_new_list_of_series_which_actually_is_update(
+                        sorted_series_list, series_old_data[key]
+                    )
                 )
                 if len(no_longer_existing) > 0:
                     NO_LONGER_EXISTING_EVENTS.extend(no_longer_existing)
 
                 series_old_data[key] = sorted_series_list
 
-            if key not in hashed_dict:
-                hashed_dict[key] = hashed_data
-                yield series_list
-            else:
-                if hashed_dict[key] != hashed_data:
-                    hashed_dict[key] = hashed_data
-                    yield series_list
-                else:
-                    print(f"data for {month_loop=} {year=} has not changed")
-                    yield []
+            yield actual_new_filtered_list
+
+            # if key not in hashed_dict:
+            #     hashed_dict[key] = hashed_data
+            #     yield actual_new_filtered_list
+            # else:
+            #     if hashed_dict[key] != hashed_data:
+            #         hashed_dict[key] = hashed_data
+            #         yield actual_new_filtered_list
+            #     else:
+            #         print(f"data for {month_loop=} {year=} has not changed")
+            #         yield []
 
         else:
             yield []
