@@ -24,6 +24,7 @@ from utility.pickle_utility import (
 )
 from utility.get_image_from_url import download_image_from_urls
 from utility.general_util import get_anime_url_from_events
+from utility.series_to_image_mapping import SeriesToImageMapping
 from log.logconfig import logger  # noqa: F401
 
 dotenv.load_dotenv()
@@ -50,15 +51,15 @@ def main():
     current_year = time_utility.get_current_year()
     current_month = datetime.now().month
 
-    images_mapping = {}
+    images_mapping = SeriesToImageMapping()
 
     # Get series for the current year
     for data in get_series_for_year(s, current_year, series_old_data):
         anime_url = get_anime_url_from_events(data)
 
-        images_mapping = download_image_from_urls(anime_url)
+        download_image_from_urls(anime_url)
 
-        add_event_from_data_series(data, images_mapping)
+        add_event_from_data_series(data, images_mapping.get_mapping())
 
     month_limiter = -7 + current_month
     next_year = current_year + 1
@@ -69,9 +70,9 @@ def main():
 
         anime_url = get_anime_url_from_events(data)
 
-        images_mapping = download_image_from_urls(anime_url)
+        download_image_from_urls(anime_url)
 
-        add_event_from_data_series(data, images_mapping)
+        add_event_from_data_series(data, images_mapping.get_mapping())
 
     save_picked_series_data(series_old_data)
 
@@ -80,9 +81,13 @@ def main():
             "No longer existing events size: %d", len(NO_LONGER_EXISTING_EVENTS)
         )
         print(NO_LONGER_EXISTING_EVENTS)
-        delete_no_longer_existing_events(NO_LONGER_EXISTING_EVENTS, images_mapping)
+        delete_no_longer_existing_events(
+            NO_LONGER_EXISTING_EVENTS, images_mapping.get_mapping()
+        )
     else:
         logging.info("No events to delete.")
+
+    images_mapping.save_mapping()
 
     logging.info("Finished the script in %.2f secs", time.time() - start_time)
 
