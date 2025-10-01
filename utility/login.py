@@ -5,7 +5,6 @@ This module contains functions for logging into a website.
 import requests
 
 
-
 def login_user(username: str, password: str, login_url: str) -> requests.Session:
     """
     Logs into a website using the provided username and password and returns an authenticated requests session.
@@ -25,6 +24,6 @@ def login_user(username: str, password: str, login_url: str) -> requests.Session
     print("trying to login")
 
     session.post(
-        login_url, data={"username": username, "password": password},timeout=10
+        login_url, data={"username": username, "password": password}, timeout=10
     )
     return session

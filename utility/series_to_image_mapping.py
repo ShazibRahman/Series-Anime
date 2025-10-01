@@ -51,7 +51,7 @@ class SeriesToImageMapping:
             logger.error("Failed to load series-to-image mapping: %s" % e)
             self._data = {}
 
-        print("loaded mapping with", len(self._data), "entries")
+        logger.debug("loaded mapping with %s entries", len(self._data))
         return self._data
 
     def save_mapping(self):
@@ -60,12 +60,13 @@ class SeriesToImageMapping:
         Persists whatever is currently in self._data.
         """
 
-        logger.info(
+        logger.debug(
             "Saving series-to-image mapping with %d entries",
             len(self._data) if self._data else 0,
         )
         if self._data is None or len(self._data) == 0:
-            self._data = self.get_mapping()
+            logger.warning("No data to save, skipping.")
+            return
 
         try:
             with io.open(self._file, "wb") as f:
@@ -81,7 +82,7 @@ class SeriesToImageMapping:
         for key in keys_to_be_deleted:
             if key in self._data:
                 image_path = self._data[key]
-                print("deleting", key, "->", image_path)
+                logger.debug("deleting", key, "->", image_path)
 
                 # Only delete if image_path is a valid str or Path
                 if isinstance(image_path, (str, bytes, os.PathLike)):
@@ -89,6 +90,6 @@ class SeriesToImageMapping:
                         if os.path.exists(image_path):
                             os.remove(image_path)
                     except Exception as e:
-                        print(f"Failed to delete {image_path}: {e}")
+                        logger.debug(f"Failed to delete {image_path}: {e}")
 
                 del self._data[key]

@@ -48,7 +48,7 @@ formatter.datefmt = "%m/%d/%Y %I:%M:%S %p"
 
 # Set the formatter for the file handler
 handler.setFormatter(formatter)
-handler.setLevel(log.INFO)
+handler.setLevel(log.DEBUG)
 
 # Add the handler to the logger
 logger.addHandler(handler)
