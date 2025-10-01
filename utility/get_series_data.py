@@ -9,11 +9,16 @@ import warnings
 import requests
 from bs4 import BeautifulSoup
 from bs4.element import Tag
+from common_dto.events import CalendarDtoPickled
 
+from utility.general_util import (
+    merge_time_str_datetime_date,
+    fill_new_series_list_calendar_ids,
+)
 from .filters_util import filter_series
 from .return_event_that_no_longer_exist import (
-    return_no_longer_existing_event,
-    return_new_list_of_series_which_actually_is_update,
+    return_no_longer_existing_event_v2,
+    return_new_list_of_series_which_actually_is_updated_v2,
 )
 
 NO_LONGER_EXISTING_EVENTS = []
@@ -173,7 +178,7 @@ def get_series_data_for_the_current_month_btw_start_date_end_date(
 
 def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
     page_content: str, start_date, end_date, month: int, year: int
-) -> list:
+) -> list[CalendarDtoPickled]:
     """
     This function takes the page content of the calendar page from next episode, a start date and end date
     and the month and year, and returns a list of tuples. Each tuple contains the name of the show,
@@ -193,7 +198,8 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
     print(month, year)
     soup = BeautifulSoup(page_content, "html.parser")
     spans = soup.find_all("span")
-    series_data = []
+
+    calendar_objects = []
 
     extracted_month, extracted_year = get_month_year_from_html(soup)
     if month != extracted_month or year != extracted_year:
@@ -219,20 +225,21 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
                 day_to_add_to_list = first_day_of_month.replace(day=int(day))
                 day_list = [day_to_add_to_list] * len(shows)
                 # print(f"{day_list=} {shows=} {times=}")
-                series_data.extend(
-                    [
-                        (
-                            show.find("a")["title"],
-                            _modify_link(show.find("a")["href"]),
-                            TIME.find("div", class_="h").text,
-                            day,
-                        )
-                        for show, TIME, day in zip(shows, times, day_list)
-                        if not apply_filter(show.find("a")["title"])
-                    ]
-                )
+                # Directly create CalendarDtoPickled objects
+                day_calendar_objects = [
+                    CalendarDtoPickled(
+                        summary=show.find("a")["title"],
+                        url=_modify_link(show.find("a")["href"]),
+                        start_time=TIME.find("div", class_="h").text,
+                        start_date=day_date,
+                    )
+                    for show, TIME, day_date in zip(shows, times, day_list)
+                    if not apply_filter(show.find("a")["title"])
+                ]
 
-    return series_data
+                calendar_objects.extend(day_calendar_objects)
+
+    return calendar_objects
 
 
 def apply_filter(show_name: str) -> bool:
@@ -259,7 +266,7 @@ def get_month_year_from_html(soup):
 def get_series_for_year(
     session: requests.Session,
     year: int,
-    series_old_data: dict,
+    series_old_data: dict[str, list[CalendarDtoPickled]],
     month_limiter: int = 12,
 ):
     """
@@ -270,6 +277,7 @@ def get_series_for_year(
     If the page content doesn't contain the anchor tag with the name "today", it will return an empty list
 
     Args:
+        series_old_data:
         month_limiter:
         session (requests.session): The requests' session.
         year (int): The year.
@@ -287,44 +295,42 @@ def get_series_for_year(
         response = session.get(base_url, params={"year": year, "month": month_loop})
         print(f"time taken = {(time.time() - start_time):.2f} seconds")
         if response.status_code == 200:
-            series_list = (
+            series_list: list[CalendarDtoPickled] = (
                 get_series_data_for_the_current_month_btw_start_date_end_date_v2(
                     response.text, 1, 31, month_loop, year
                 )
             )
             key: str = f"{month_loop}_{year}"
 
-            sorted_series_list = sorted(series_list, key=lambda x: x[3])
+            sorted_series_list = sorted(
+                series_list,
+                key=lambda x: (
+                    merge_time_str_datetime_date(x.start_time, x.start_date),
+                    x.summary,
+                ),
+            )
             if key not in series_old_data:
                 series_old_data[key] = sorted_series_list
                 actual_new_filtered_list = sorted_series_list
 
             else:
-                no_longer_existing = return_no_longer_existing_event(
+                no_longer_existing = return_no_longer_existing_event_v2(
                     series_old_data[key], sorted_series_list
                 )
+
                 actual_new_filtered_list = (
-                    return_new_list_of_series_which_actually_is_update(
+                    return_new_list_of_series_which_actually_is_updated_v2(
                         sorted_series_list, series_old_data[key]
                     )
                 )
                 if len(no_longer_existing) > 0:
                     NO_LONGER_EXISTING_EVENTS.extend(no_longer_existing)
 
-                series_old_data[key] = sorted_series_list
+                series_old_data[key] = fill_new_series_list_calendar_ids(
+                    series_old_data, key, sorted_series_list
+                )
 
             yield actual_new_filtered_list
-
-            # if key not in hashed_dict:
-            #     hashed_dict[key] = hashed_data
-            #     yield actual_new_filtered_list
-            # else:
-            #     if hashed_dict[key] != hashed_data:
-            #         hashed_dict[key] = hashed_data
-            #         yield actual_new_filtered_list
-            #     else:
-            #         print(f"data for {month_loop=} {year=} has not changed")
-            #         yield []
 
         else:
             yield []

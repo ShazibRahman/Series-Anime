@@ -6,10 +6,10 @@ import logging
 
 from decorator_utils import singleton_with_no_parameters
 
+from .general_util import clean_not_existing_series_data_from_image_mapping_v2
 from .pickle_utility import (
     get_picked_series_data,
 )
-from .general_util import clean_not_existing_series_data_from_image_mapping
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,10 @@ class SeriesToImageMapping:
             with io.open(self._file, "rb") as f:
                 self._data = pickle.load(f)
                 # Clean any stale entries
-                keys_to_be_deleted = clean_not_existing_series_data_from_image_mapping(
-                    self._data, get_picked_series_data()
+                keys_to_be_deleted = (
+                    clean_not_existing_series_data_from_image_mapping_v2(
+                        self._data, get_picked_series_data()
+                    )
                 )
                 self.__delete_removed_image_mapping(keys_to_be_deleted)
         except Exception as e:

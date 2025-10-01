@@ -8,12 +8,14 @@ import time
 from datetime import datetime
 
 import dotenv
+from common_dto.events import CalendarDtoPickled
 
 # Move all import statements here
 from utility import time_utility
-from utility.add_event_to_google_calendar import (
-    add_event_from_data_series,
-    delete_no_longer_existing_events,
+from utility.general_util import get_anime_urls_from_events_v2
+from utility.google_calendar_util import (
+    add_event_from_data_series_v2,
+    delete_no_longer_existing_events_v2,
 )
 from utility.get_series_data import get_series_for_year, NO_LONGER_EXISTING_EVENTS
 from utility.lock_manager import lock_manager_decorator
@@ -23,7 +25,6 @@ from utility.pickle_utility import (
     save_picked_series_data,
 )
 from utility.get_image_from_url import download_image_from_urls
-from utility.general_util import get_anime_url_from_events
 from utility.series_to_image_mapping import SeriesToImageMapping
 from log.logconfig import logger  # noqa: F401
 
@@ -44,7 +45,7 @@ def main():
     start_time = time.time()
     s = login_user(USERNAME, PASSWORD, LOGIN_URL)
     # clean_up()
-    series_old_data = get_picked_series_data()
+    series_old_data: dict[str, list[CalendarDtoPickled]] = get_picked_series_data()
 
     print("Getting series for the year")
 
@@ -55,11 +56,11 @@ def main():
 
     # Get series for the current year
     for data in get_series_for_year(s, current_year, series_old_data):
-        anime_url = get_anime_url_from_events(data)
+        anime_url = get_anime_urls_from_events_v2(data)
 
         download_image_from_urls(anime_url)
 
-        add_event_from_data_series(data, images_mapping.get_mapping())
+        add_event_from_data_series_v2(data, images_mapping.get_mapping())
 
     month_limiter = -7 + current_month
     next_year = current_year + 1
@@ -68,11 +69,11 @@ def main():
         s, next_year, series_old_data, month_limiter
     ):  # till the month limiter
 
-        anime_url = get_anime_url_from_events(data)
+        anime_url = get_anime_urls_from_events_v2(data)
 
         download_image_from_urls(anime_url)
 
-        add_event_from_data_series(data, images_mapping.get_mapping())
+        add_event_from_data_series_v2(data, images_mapping.get_mapping())
 
     save_picked_series_data(series_old_data)
 
@@ -81,7 +82,7 @@ def main():
             "No longer existing events size: %d", len(NO_LONGER_EXISTING_EVENTS)
         )
         print(NO_LONGER_EXISTING_EVENTS)
-        delete_no_longer_existing_events(
+        delete_no_longer_existing_events_v2(
             NO_LONGER_EXISTING_EVENTS, images_mapping.get_mapping()
         )
     else:
