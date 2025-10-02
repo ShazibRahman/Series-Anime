@@ -5,9 +5,9 @@ This module contains utility functions for adding events to Google Calendar.
 import datetime
 from logging import getLogger
 
-import pytz
 from common_dto.events import CalendarDtoPickled
 from gdrive_tool import my_google_calendar
+import pytz
 
 logger = getLogger(__name__)
 
@@ -203,43 +203,15 @@ def add_event_from_data_series_v2(
         series.calendar_id = calendar_id
 
 
-# def delete_no_longer_existing_events(series_list_to_delete: list, image_mapping: dict):
-#     """
-#     This function deletes events from Google Calendar that are no longer existing.
-#     The events to be deleted are stored in the NO_LONGER_EXISTING_EVENTS list.
-#     """
-#     google_calendar = my_google_calendar.GoogleCalendar()
-#     for event in series_list_to_delete:
-#         summary = event[0]
-
-#         time_str = event[2]
-#         day: datetime.date = event[3]  # this is the datetime.date
-#         image_url = ""
-
-#         if event[1] in image_mapping:
-#             image_url = image_mapping[event[1]]
-
-#         # parse 7:30pm today to datetime object using pytz and datetime
-#         date_time_series = datetime.datetime.strptime(time_str, I_M_P)
-#         combined_datetime = datetime.datetime.combine(day, date_time_series.time())
-#         start_time = pytz.timezone(TI).localize(
-#             combined_datetime + datetime.timedelta(hours=1)
-#         )
-
-#         google_calendar.delete_event(
-#             start_date_to_update=start_time,
-#             summary=summary,
-#             image_url=image_url,
-#         )
-
-
 def delete_no_longer_existing_events_v2(
-    series_list_to_delete: list[CalendarDtoPickled], image_mapping: dict
+    series_list_to_delete: list[CalendarDtoPickled], image_mapping: dict | None
 ):
     """
     This function deletes events from Google Calendar that are no longer existing.
     The events to be deleted are stored in the NO_LONGER_EXISTING_EVENTS list.
     """
+    if image_mapping is None:
+        image_mapping = {}
     google_calendar = my_google_calendar.GoogleCalendar()
     for event in series_list_to_delete:
         if event.calendar_id is None:
@@ -249,27 +221,3 @@ def delete_no_longer_existing_events_v2(
             image_url=image_mapping[event.url],
             summary=event.summary,
         )
-
-
-def get_calendar_ids(events) -> None:
-    """
-    This function returns a list of calendar IDs.
-    """
-    google_calendar = my_google_calendar.GoogleCalendar()
-
-    for event in events:
-        summary = event[0]
-
-        time_str = event[2]
-        day: datetime.date = event[3]  # this is the datetime.date
-
-        # parse 7:30pm today to datetime object using pytz and datetime
-        date_time_series = datetime.datetime.strptime(time_str, I_M_P)
-        combined_datetime = datetime.datetime.combine(day, date_time_series.time())
-        start_time = pytz.timezone(TI).localize(
-            combined_datetime + datetime.timedelta(hours=1)
-        )
-        calendar_ids = google_calendar.get_calendar_id(
-            start_date_to_update=start_time, summary=summary
-        )
-        print(calendar_ids)

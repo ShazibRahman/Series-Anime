@@ -8,174 +8,20 @@ import datetime
 import time
 import warnings
 
-import httpx
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from common_dto.events import CalendarDtoPickled
+import httpx
 
-from utility.general_util import (
-    merge_time_str_datetime_date,
-    fill_new_series_list_calendar_ids,
-)
-from .filters_util import filter_series
-from .return_event_that_no_longer_exist import (
-    return_no_longer_existing_event_v2,
+from utility.event_filter_utility import (
     return_new_list_of_series_which_actually_is_updated_v2,
+    return_no_longer_existing_event_v2,
 )
+from utility.filters_util import filter_series
+from utility.general_util import fill_new_series_list_calendar_ids
+from utility.time_utility import merge_time_str_datetime_date
 
 NO_LONGER_EXISTING_EVENTS = []
-
-
-# not used don't use it for now
-def get_series_data_for_current_day(page_content: str) -> list:
-    """
-    This function takes the page content of the calendar page
-    from next episode and returns a list of tuples.
-    Each tuple contains the name of the show, the l
-    ink to the show and the time of the show.
-    If the page content doesn't contain the anchor
-    tag with the name "today", it will return an empty list
-
-    Args:
-        page_content (str):
-        The page content of the calendar page from next episode.
-
-    Returns:
-        list: A list of tuples. Each tuple contains the name of the show,
-        the link to the show and the time of the show.
-    """
-    soup = BeautifulSoup(page_content, "html.parser")
-    today_anchor: Tag = soup.find("a", {"name": "today"})
-    if today_anchor:
-        parent = today_anchor.parent
-
-        shows = parent.find_all("div", class_="cal_name")
-        times = parent.find_all("div", class_="cal_more")
-        return [
-            (
-                show.find("a").text,
-                _modify_link(show.find("a")["href"]),
-                TIME.find("div", class_="h").text,
-            )
-            for show, TIME in zip(shows, times)
-        ]
-    else:
-        return []
-
-
-# not being used don't use it for now
-def get_series_data_for_today_and_next_no_of_days_within_a_week(
-    page_content: str, no_of_days: int
-) -> list:
-    """
-    This function takes the page content of the calendar page
-    from next episode and the number of days to retrieve
-    and returns a list of tuples. Each tuple contains the name of the show,
-    the link to the show and the time of the show
-    for the next number of days.
-
-    Args:
-        page_content (str): The page content of the calendar page from next episode.
-        no_of_days (int): The number of days for which the series data should be retrieved.
-
-    Returns:
-        list: A list of tuples. Each tuple contains the name of the show,
-        the link to the show and the time of the show.
-    """
-    warnings.warn(
-        "get_series_data_for_today_and_next_no_of_days_within_a_week is deprecated and will be removed in a future version.",
-        DeprecationWarning,
-    )
-    soup = BeautifulSoup(page_content, "html.parser")
-    today_anchor: Tag = soup.find("a", {"name": "today"})
-    series_data = []
-    day_data: Tag
-    if today_anchor:
-        parent = today_anchor.parent
-        day_data = parent
-
-        shows = day_data.find_all("div", class_="cal_name")
-        times = day_data.find_all("div", class_="cal_more")
-        days_to_add_in_time = [0] * len(shows)
-        series_data.extend(
-            [
-                (
-                    show.find("a").text,
-                    _modify_link(show.find("a")["href"]),
-                    TIME.find("div", class_="h").text,
-                    day,
-                )
-                for show, TIME, day in zip(shows, times, days_to_add_in_time)
-            ]
-        )
-    for i in range(1, no_of_days + 1):
-        day_data = day_data.next_sibling.next_sibling  # noqa
-        shows = day_data.find_all("div", class_="cal_name")
-        times = day_data.find_all("div", class_="cal_more")
-        days_to_add_in_time = [i] * len(shows)
-        series_data.extend(
-            [
-                (
-                    show.find("a")["title"],
-                    _modify_link(show.find("a")["href"]),
-                    time_series.find("div", class_="h").text,
-                    day,
-                )
-                for show, time_series, day in zip(shows, times, days_to_add_in_time)
-            ]
-        )
-
-    return series_data
-
-
-# not used don't use it for now
-def get_series_data_for_the_current_month_btw_start_date_end_date(
-    page_content: str, start_date, end_date
-) -> list:
-    """
-    This function takes the page content of the calendar page
-    from next episode and a start date and an end date
-    and returns a list of tuples. Each tuple contains the name of the show,
-    the link to the show and the time of the show
-    for the days between the start date and the end date.
-
-    Args:
-        page_content (str): The page content of the calendar page from next episode.
-        start_date (int): The start date of the range of days.
-        end_date (int): The end date of the range of days.
-
-    Returns:
-        list: A list of tuples. Each tuple contains the name of the show,
-        the link to the show and the time of the show.
-    """
-    print(start_date, end_date)
-    soup = BeautifulSoup(page_content, "html.parser")
-    spans = soup.find_all("span")
-    series_data = []
-
-    for span in spans:
-        if (
-            span.string and span.string.strip().isdigit()
-        ):  # Check if the span contains a number (the day)
-            day = span.string.strip()
-            if start_date <= int(day) <= end_date:
-                day_data_td = span.parent.parent
-                shows = day_data_td.find_all("div", class_="cal_name")
-                times = day_data_td.find_all("div", class_="cal_more")
-                day_list = [int(day)] * len(shows)
-                series_data.extend(
-                    [
-                        (
-                            show.find("a")["title"],
-                            _modify_link(show.find("a")["href"]),
-                            TIME.find("div", class_="h").text,
-                            day,
-                        )
-                        for show, TIME, day in zip(shows, times, day_list)
-                    ]
-                )
-
-    return series_data
 
 
 def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
@@ -230,13 +76,13 @@ def get_series_data_for_the_current_month_btw_start_date_end_date_v2(
                 # Directly create CalendarDtoPickled objects
                 day_calendar_objects = [
                     CalendarDtoPickled(
-                        summary=show.find("a")["title"],
-                        url=_modify_link(show.find("a")["href"]),
+                        summary=show.find("a")["title"],  # type: ignore
+                        url=_modify_link(show.find("a")["href"]),  # type: ignore
                         start_time=TIME.find("div", class_="h").text,
                         start_date=day_date,
                     )
                     for show, TIME, day_date in zip(shows, times, day_list)
-                    if not apply_filter(show.find("a")["title"])
+                    if not apply_filter(show.find("a")["title"])  # type: ignore
                 ]
 
                 calendar_objects.extend(day_calendar_objects)
@@ -367,6 +213,158 @@ def get_appropriate_month_range(year) -> tuple[int, int]:
 
 def _modify_link(link: str) -> str:
     return f"https:{link}"
+
+
+# not being used don't use it for now
+def get_series_data_for_today_and_next_no_of_days_within_a_week(
+    page_content: str, no_of_days: int
+) -> list:
+    """
+    This function takes the page content of the calendar page
+    from next episode and the number of days to retrieve
+    and returns a list of tuples. Each tuple contains the name of the show,
+    the link to the show and the time of the show
+    for the next number of days.
+
+    Args:
+        page_content (str): The page content of the calendar page from next episode.
+        no_of_days (int): The number of days for which the series data should be retrieved.
+
+    Returns:
+        list: A list of tuples. Each tuple contains the name of the show,
+        the link to the show and the time of the show.
+    """
+    warnings.warn(
+        "get_series_data_for_today_and_next_no_of_days_within_a_week is deprecated and will be removed in a future version.",
+        DeprecationWarning,
+    )
+    soup = BeautifulSoup(page_content, "html.parser")
+    today_anchor: Tag = soup.find("a", {"name": "today"})
+    series_data = []
+    day_data: Tag
+    if today_anchor:
+        parent = today_anchor.parent
+        day_data = parent
+
+        shows = day_data.find_all("div", class_="cal_name")
+        times = day_data.find_all("div", class_="cal_more")
+        days_to_add_in_time = [0] * len(shows)
+        series_data.extend(
+            [
+                (
+                    show.find("a").text,
+                    _modify_link(show.find("a")["href"]),  # type: ignore
+                    TIME.find("div", class_="h").text,
+                    day,
+                )
+                for show, TIME, day in zip(shows, times, days_to_add_in_time)
+            ]
+        )
+    for i in range(1, no_of_days + 1):
+        day_data = day_data.next_sibling.next_sibling  # noqa # type: ignore
+        shows = day_data.find_all("div", class_="cal_name")
+        times = day_data.find_all("div", class_="cal_more")
+        days_to_add_in_time = [i] * len(shows)
+        series_data.extend(
+            [
+                (
+                    show.find("a")["title"],  # type: ignore
+                    _modify_link(show.find("a")["href"]),  # type: ignore
+                    time_series.find("div", class_="h").text,
+                    day,
+                )
+                for show, time_series, day in zip(shows, times, days_to_add_in_time)
+            ]
+        )
+
+    return series_data
+
+
+# not used don't use it for now
+def get_series_data_for_the_current_month_btw_start_date_end_date(
+    page_content: str, start_date, end_date
+) -> list:
+    """
+    This function takes the page content of the calendar page
+    from next episode and a start date and an end date
+    and returns a list of tuples. Each tuple contains the name of the show,
+    the link to the show and the time of the show
+    for the days between the start date and the end date.
+
+    Args:
+        page_content (str): The page content of the calendar page from next episode.
+        start_date (int): The start date of the range of days.
+        end_date (int): The end date of the range of days.
+
+    Returns:
+        list: A list of tuples. Each tuple contains the name of the show,
+        the link to the show and the time of the show.
+    """
+    print(start_date, end_date)
+    soup = BeautifulSoup(page_content, "html.parser")
+    spans = soup.find_all("span")
+    series_data = []
+
+    for span in spans:
+        if (
+            span.string and span.string.strip().isdigit()
+        ):  # Check if the span contains a number (the day)
+            day = span.string.strip()
+            if start_date <= int(day) <= end_date:
+                day_data_td = span.parent.parent
+                shows = day_data_td.find_all("div", class_="cal_name")
+                times = day_data_td.find_all("div", class_="cal_more")
+                day_list = [int(day)] * len(shows)
+                series_data.extend(
+                    [
+                        (
+                            show.find("a")["title"],  # type: ignore
+                            _modify_link(show.find("a")["href"]),  # type: ignore
+                            TIME.find("div", class_="h").text,
+                            day,
+                        )
+                        for show, TIME, day in zip(shows, times, day_list)
+                    ]
+                )
+
+    return series_data
+
+
+# not used don't use it for now
+def get_series_data_for_current_day(page_content: str) -> list:
+    """
+    This function takes the page content of the calendar page
+    from next episode and returns a list of tuples.
+    Each tuple contains the name of the show, the l
+    ink to the show and the time of the show.
+    If the page content doesn't contain the anchor
+    tag with the name "today", it will return an empty list
+
+    Args:
+        page_content (str):
+        The page content of the calendar page from next episode.
+
+    Returns:
+        list: A list of tuples. Each tuple contains the name of the show,
+        the link to the show and the time of the show.
+    """
+    soup = BeautifulSoup(page_content, "html.parser")
+    today_anchor: Tag = soup.find("a", {"name": "today"})
+    if today_anchor:
+        parent = today_anchor.parent
+
+        shows = parent.find_all("div", class_="cal_name")
+        times = parent.find_all("div", class_="cal_more")
+        return [
+            (
+                show.find("a").text,
+                _modify_link(show.find("a")["href"]),  # type: ignore
+                TIME.find("div", class_="h").text,
+            )
+            for show, TIME in zip(shows, times)
+        ]
+    else:
+        return []
 
 
 if __name__ == "__main__":

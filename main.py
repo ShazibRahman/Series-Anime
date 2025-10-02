@@ -18,7 +18,6 @@ from utility.google_calendar_util import (
     delete_no_longer_existing_events_v2,
 )
 from utility.get_series_data import get_series_for_year, NO_LONGER_EXISTING_EVENTS
-from utility.lock_manager import lock_manager_decorator
 from utility.login import login_user_httpx
 from utility.pickle_utility import (
     get_picked_series_data,
@@ -26,6 +25,7 @@ from utility.pickle_utility import (
 )
 from utility.get_image_from_url import download_image_from_urls
 from utility.series_to_image_mapping import SeriesToImageMapping
+from decorator_utils import lock_manager_decorator
 from log.logconfig import logger  # noqa: F401
 
 dotenv.load_dotenv()
@@ -35,7 +35,6 @@ LOGIN_URL = os.getenv("next_login_url", "")
 USERNAME = os.getenv("next_user", "")
 PASSWORD = os.getenv("next_password", "")
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
-print(CUR_DIR)
 
 
 @lock_manager_decorator(os.path.join(CUR_DIR, "series.lock"))
@@ -83,7 +82,6 @@ def main():
         logging.info(
             "No longer existing events size: %d", len(NO_LONGER_EXISTING_EVENTS)
         )
-        print(NO_LONGER_EXISTING_EVENTS)
         delete_no_longer_existing_events_v2(
             NO_LONGER_EXISTING_EVENTS, images_mapping.get_mapping()
         )

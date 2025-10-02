@@ -1,5 +1,3 @@
-import datetime
-
 from common_dto.events import CalendarDtoPickled
 
 
@@ -115,30 +113,20 @@ def clean_not_existing_series_data_from_image_mapping_v2(
     return keys_to_be_deleted
 
 
-def merge_time_str_datetime_date(
-    time_str: str, day: datetime.date
-) -> datetime.datetime:
+def event_key(event: CalendarDtoPickled):
     """
-    Merges a time string and a date object into a single formatted datetime string.
+    Returns a tuple containing the summary, start time and start date of an event.
 
     Parameters
     ----------
-    time_str : str
-        The time string in the format "H:MMam/pm" (e.g., "7:30pm").
-    day : datetime.date
-        The date object representing the date.
+    event : CalendarDtoPickled
+        The event to extract the key from.
 
     Returns
     -------
-    str
-        A formatted datetime string in the format "YYYY-MM-DD HH:MMam/pm".
+    tuple
+        A tuple containing the summary, start time and start date of the event.
     """
-    date_time_series = datetime.datetime.strptime(time_str, "%I:%M%p")
-    combined_datetime = datetime.datetime.combine(day, date_time_series.time())
-    return combined_datetime
-
-
-def event_key(event: CalendarDtoPickled):
     return event.summary, event.start_time, event.start_date
 
 

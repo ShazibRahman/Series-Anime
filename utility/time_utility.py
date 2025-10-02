@@ -3,7 +3,7 @@ This module contains utility functions for time related tasks.
 """
 
 import calendar
-from datetime import datetime, date
+from datetime import date, datetime
 
 day_name_list = [
     "Sunday",
@@ -96,6 +96,27 @@ def get_current_month() -> int:
     :return: int
     """
     return datetime.now().month
+
+
+def merge_time_str_datetime_date(time_str: str, day: date) -> datetime:
+    """
+    Merges a time string and a date object into a single formatted datetime string.
+
+    Parameters
+    ----------
+    time_str : str
+        The time string in the format "H:MMam/pm" (e.g., "7:30pm").
+    day : datetime.date
+        The date object representing the date.
+
+    Returns
+    -------
+    str
+        A formatted datetime string in the format "YYYY-MM-DD HH:MMam/pm".
+    """
+    date_time_series = datetime.strptime(time_str, "%I:%M%p")
+    combined_datetime = datetime.combine(day, date_time_series.time())
+    return combined_datetime
 
 
 if __name__ == "__main__":
