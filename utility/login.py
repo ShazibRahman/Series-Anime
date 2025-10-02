@@ -2,12 +2,12 @@
 This module contains functions for logging into a website.
 """
 
-import requests
+import httpx
 
 
-def login_user(username: str, password: str, login_url: str) -> requests.Session:
+def login_user_httpx(username: str, password: str, login_url: str) -> httpx.Client:
     """
-    Logs into a website using the provided username and password and returns an authenticated requests session.
+    Logs into a website using the provided username and password and returns an authenticated httpx client.
 
     Args:
         username (str): The username for logging in.
@@ -15,15 +15,12 @@ def login_user(username: str, password: str, login_url: str) -> requests.Session
         login_url (str): The URL to send the login request to.
 
     Returns:
-        requests.Session: An authenticated session if the login is successful.
+        httpx.Client: An authenticated client if the login is successful.
     """
-    session = requests.Session()
-    # headers = {
-    #     "Content-Type": "application/x-www-form-urlencoded",
-    # }
+    client = httpx.Client(timeout=10.0, http2=True)
     print("trying to login")
 
-    session.post(
+    client.post(
         login_url, data={"username": username, "password": password}, timeout=10
     )
-    return session
+    return client

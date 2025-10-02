@@ -19,7 +19,7 @@ from utility.google_calendar_util import (
 )
 from utility.get_series_data import get_series_for_year, NO_LONGER_EXISTING_EVENTS
 from utility.lock_manager import lock_manager_decorator
-from utility.login import login_user
+from utility.login import login_user_httpx
 from utility.pickle_utility import (
     get_picked_series_data,
     save_picked_series_data,
@@ -31,9 +31,9 @@ from log.logconfig import logger  # noqa: F401
 dotenv.load_dotenv()
 
 
-LOGIN_URL = os.getenv("next_login_url")
-USERNAME = os.getenv("next_user")
-PASSWORD = os.getenv("next_password")
+LOGIN_URL = os.getenv("next_login_url", "")
+USERNAME = os.getenv("next_user", "")
+PASSWORD = os.getenv("next_password", "")
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
 print(CUR_DIR)
 
@@ -43,7 +43,9 @@ def main():
     """Main function to execute the script for adding anime events to Google Calendar."""
 
     start_time = time.time()
-    s = login_user(USERNAME, PASSWORD, LOGIN_URL)
+    s = login_user_httpx(USERNAME, PASSWORD, LOGIN_URL)
+
+    # return
     # clean_up()
     series_old_data: dict[str, list[CalendarDtoPickled]] = get_picked_series_data()
 

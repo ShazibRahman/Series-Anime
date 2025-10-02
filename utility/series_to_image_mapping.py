@@ -31,7 +31,7 @@ class SeriesToImageMapping:
 
         self._data: dict[str, str] | None = None  # lazy load
 
-    def get_mapping(self) -> dict:
+    def get_mapping(self) -> dict | None:
         """
         Retrieve the series-to-image mapping (cached in memory).
         Automatically cleans entries that no longer exist in series data.
@@ -53,7 +53,9 @@ class SeriesToImageMapping:
             logger.error("Failed to load series-to-image mapping: %s" % e)
             self._data = {}
 
-        logger.debug("loaded mapping with %s entries", len(self._data))
+        logger.debug(
+            "loaded mapping with %s entries", len(self._data if self._data else {})
+        )
         return self._data
 
     def save_mapping(self):

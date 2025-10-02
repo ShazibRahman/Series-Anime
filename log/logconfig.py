@@ -1,11 +1,10 @@
 import logging as log
 import pathlib
 import sys
+from common_util import DesktopNotification
 from logging.handlers import TimedRotatingFileHandler
 
 logger_path = pathlib.Path(__file__).parent.joinpath("logger.log")
-
-from utility import DesktopNotification
 
 # Create the logger
 logger = log.getLogger()
@@ -48,14 +47,14 @@ formatter.datefmt = "%m/%d/%Y %I:%M:%S %p"
 
 # Set the formatter for the file handler
 handler.setFormatter(formatter)
-handler.setLevel(log.DEBUG)
+handler.setLevel(log.INFO)
 
 # Add the handler to the logger
 logger.addHandler(handler)
 
 # Add a stream handler to output logs to stdout
 stream_handler = log.StreamHandler(sys.stdout)
-stream_handler.setLevel(log.DEBUG)
+stream_handler.setLevel(log.INFO)
 stream_handler.setFormatter(formatter)
 logger.addHandler(stream_handler)
 
@@ -84,3 +83,8 @@ def log_uncaught_exceptions(exctype, value, traceback):
 
 # Set the exception hook
 sys.excepthook = log_uncaught_exceptions
+
+
+# Silence httpx internal info logs
+log.getLogger("httpx").setLevel(log.WARNING)  # ignore INFO logs
+log.getLogger("httpcore").setLevel(log.WARNING)  #

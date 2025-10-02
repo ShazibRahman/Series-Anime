@@ -2,11 +2,13 @@
 This module contains functions for retrieving series data from next episode.
 """
 
+# pyright: reportGeneralTypeIssues=false, reportOptionalMemberAccess=false, reportAssignmentType = false
+
 import datetime
 import time
 import warnings
 
-import requests
+import httpx
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 from common_dto.events import CalendarDtoPickled
@@ -264,7 +266,7 @@ def get_month_year_from_html(soup):
 
 
 def get_series_for_year(
-    session: requests.Session,
+    session: httpx.Client,
     year: int,
     series_old_data: dict[str, list[CalendarDtoPickled]],
     month_limiter: int = 12,
@@ -309,6 +311,7 @@ def get_series_for_year(
                     x.summary,
                 ),
             )
+
             if key not in series_old_data:
                 series_old_data[key] = sorted_series_list
                 actual_new_filtered_list = sorted_series_list

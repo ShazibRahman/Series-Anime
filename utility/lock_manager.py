@@ -4,6 +4,7 @@ import pathlib
 import time
 from functools import wraps
 import logging
+from typing import Any
 
 import psutil
 
@@ -91,8 +92,9 @@ class LockManager:
         self.release_control()
 
 
-def lock_manager_decorator(file_name: str | pathlib.Path) -> callable:
-    def decorator(func: callable) -> callable:
+def lock_manager_decorator(file_name: str | pathlib.Path) -> Any:
+
+    def decorator(func: Any) -> Any:
         @wraps(func)
         def wrapper(*args, **kwargs):
             lock_manager = LockManager(file_name)
@@ -112,7 +114,6 @@ if __name__ == "__main__":
     # lock_manager = LockManager(
     #     "/home/shazib/Desktop/Folder/python/wallpaper_updates/wallpaper_updator.lock"
     # )
-
 
     logging.basicConfig(level=logging.INFO)
 

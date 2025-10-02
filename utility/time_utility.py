@@ -3,7 +3,7 @@ This module contains utility functions for time related tasks.
 """
 
 import calendar
-from datetime import datetime
+from datetime import datetime, date
 
 day_name_list = [
     "Sunday",
@@ -74,7 +74,7 @@ def get_current_month_range() -> tuple:
     return calendar.monthrange(today.year, today.month)
 
 
-def get_current_date() -> datetime.date:
+def get_current_date() -> date:
     """
     This function returns the current date
     :return: datetime
@@ -82,7 +82,7 @@ def get_current_date() -> datetime.date:
     return datetime.now().date()
 
 
-def get_current_year():
+def get_current_year() -> int:
     """
     This function returns the current year
     :return: int
@@ -90,7 +90,7 @@ def get_current_year():
     return datetime.now().year
 
 
-def get_current_month():
+def get_current_month() -> int:
     """
     This function returns the current month
     :return: int

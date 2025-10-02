@@ -77,7 +77,7 @@ def clean_not_existing_series_data_from_image_mapping(
 
 
 def clean_not_existing_series_data_from_image_mapping_v2(
-    image_dict: dict[str, str], series_dict: dict[str, list[CalendarDtoPickled]]
+    image_dict: dict[str, str] | None, series_dict: dict[str, list[CalendarDtoPickled]]
 ) -> list[str]:
     """
     Cleans the image dictionary by removing entries that do not exist in the series dictionary.
@@ -93,6 +93,8 @@ def clean_not_existing_series_data_from_image_mapping_v2(
     -------
     None
     """
+    if image_dict is None:
+        return []
 
     print("Cleaning series data from image mappings...")
     keys = set()
